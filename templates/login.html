@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login - Walmart RBAC+</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url('/static/walmart_bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+        }
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .login-card {
+            max-width: 520px !important;
+            min-width: 400px !important;
+            padding: 40px 48px 32px 48px !important;
+            border-radius: 28px !important;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.1);
+            backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(255,255,255,0.25);
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 25px auto;
+            width: 120px;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .btn-walmart {
+            background: #ffc220;
+            color: #222;
+            font-weight: bold;
+            border: none;
+            transition: background 0.2s;
+        }
+        .btn-walmart:hover {
+            background: #ffb700;
+        }
+        .login-title {
+            color: #000000;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+        .login-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .login-links a {
+            color: #0071ce;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .login-links a:hover {
+            text-decoration: underline;
+        }
+        .ai-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><radialGradient id="g1" cx="50%" cy="50%"><stop offset="0%" stop-color="%23667eea" stop-opacity="0.3"/><stop offset="100%" stop-color="%23764ba2" stop-opacity="0.1"/></radialGradient><radialGradient id="g2" cx="30%" cy="70%"><stop offset="0%" stop-color="%23ff6b6b" stop-opacity="0.2"/><stop offset="100%" stop-color="%23ee5a24" stop-opacity="0.05"/></radialGradient><radialGradient id="g3" cx="70%" cy="30%"><stop offset="0%" stop-color="%234ecdc4" stop-opacity="0.2"/><stop offset="100%" stop-color="%2344a08d" stop-opacity="0.05"/></radialGradient></defs><rect width="100%" height="100%" fill="url(%23g1)"/><circle cx="200" cy="200" r="150" fill="url(%23g2)"/><circle cx="1000" cy="600" r="200" fill="url(%23g3)"/><circle cx="800" cy="150" r="100" fill="url(%23g2)"/><circle cx="300" cy="700" r="120" fill="url(%23g3)"/><g fill="%23ffffff" opacity="0.1"><circle cx="150" cy="150" r="2"/><circle cx="250" cy="300" r="1.5"/><circle cx="400" cy="200" r="1"/><circle cx="600" cy="400" r="2.5"/><circle cx="800" cy="300" r="1.8"/><circle cx="950" cy="500" r="1.2"/><circle cx="1100" cy="200" r="1.5"/><circle cx="100" cy="600" r="2"/><circle cx="500" cy="700" r="1.3"/><circle cx="700" cy="650" r="1.7"/><circle cx="900" cy="750" r="1.1"/><circle cx="350" cy="450" r="1.4"/><circle cx="650" cy="150" r="1.6"/><circle cx="450" cy="550" r="1.9"/><circle cx="750" cy="450" r="1.2"/></g><g fill="%23ffffff" opacity="0.05"><path d="M100,100 L150,150 L200,100 L250,150 L300,100"/><path d="M800,600 L850,650 L900,600 L950,650 L1000,600"/><path d="M400,300 L450,350 L500,300 L550,350 L600,300"/><path d="M600,500 L650,550 L700,500 L750,550 L800,500"/></g></svg>');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+            animation: backgroundFloat 20s ease-in-out infinite;
+        }
+
+        .ai-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+            z-index: -1;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(1deg); }
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .btn-primary, .btn-secondary {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Enhanced login card for better contrast with AI background */
+        .login-card::before {
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea, #764ba2);
+            background-size: 300% 100%;
+            animation: gradientShift 4s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary, .btn-secondary {
+            font-size: 1.1em;
+        }
+    </style>
+  </head>
+  <body>
+    <!-- AI Background Image -->
+    <div class="ai-background">
+        <div class="ai-overlay"></div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="login-container" style="align-items: center; justify-content: center; min-height: 100vh;">
+        <div class="login-card" style="max-width: 520px; min-width: 400px; padding: 40px 48px 32px 48px; border-radius: 28px;">
+            <div class="walmart-header">
+                <h1 style="font-size:2.5rem; color:#1a1a1a; font-weight:800; letter-spacing:1px;">TrustSense</h1>
+                <p style="font-size:1.1rem; color:#444;">Secure Access. Smart Decisions.</p>
+            </div>
+            
+            {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" required placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="btn-primary" style="font-size:1.1em;">Login</button>
+            </form>
+            
+            <div style="margin-top: 24px; text-align: center;">
+                <a href="/create_account" class="btn-secondary">Create Account</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus animations to form inputs
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+
+            // Add click ripple effect to buttons
+            const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.js"></script>
+  </body>
+</html>

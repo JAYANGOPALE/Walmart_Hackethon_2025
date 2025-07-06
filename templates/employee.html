@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Portal - Walmart RBAC+</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #a4508b 0%, #5f0a87 100%);
+        }
+        .header {
+            background: rgba(164,80,139,0.92);
+            border-bottom: 4px solid #43e97b;
+        }
+        .header .logo i {
+            color: #43e97b;
+        }
+        .header .logout-btn {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: #5f0a87;
+        }
+        .header .logout-btn:hover {
+            background: #5f0a87;
+            color: #fff;
+        }
+        .card {
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(164,80,139,0.18), 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card .card-icon {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: #fff;
+        }
+        .quick-link {
+            background: linear-gradient(135deg, #f1f5fa 60%, #e0e7ff 100%);
+            color: #5f0a87;
+        }
+        .quick-link:hover {
+            background: #a4508b;
+            color: #fff;
+        }
+        .trust-score {
+            color: #43e97b;
+        }
+        button[type="submit"] {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: #5f0a87;
+        }
+        button[type="submit"]:hover {
+            background: #a4508b;
+            color: #fff;
+        }
+        .table th {
+            background: linear-gradient(135deg, #a4508b, #5f0a87);
+        }
+        .table tr:hover {
+            background: rgba(164,80,139,0.07);
+        }
+        .particles .particle {
+            background: rgba(67,233,123,0.3);
+        }
+        /* Custom Animations for Employee Page */
+        .dashboard-grid {
+            animation: fadeInUp 1.2s cubic-bezier(.23,1.01,.32,1) both;
+        }
+        .card {
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(102,126,234,0.18), 0 2px 8px rgba(0,0,0,0.08);
+            padding: 32px 24px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            min-height: 180px;
+            transition: box-shadow 0.3s, transform 0.3s, background 0.3s;
+            animation: fadeInUp 0.8s cubic-bezier(.23,1.01,.32,1) both;
+        }
+        .card:hover {
+            box-shadow: 0 16px 48px rgba(102,126,234,0.28), 0 4px 16px rgba(0,0,0,0.12);
+            transform: translateY(-4px) scale(1.03);
+            background: rgba(255,255,255,0.98);
+        }
+        .card .card-icon {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-radius: 12px;
+            padding: 10px 14px;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.10);
+            align-self: flex-start;
+            animation: popIn 0.7s cubic-bezier(.23,1.01,.32,1) both;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,76,145,0.92);
+            color: #fff;
+            padding: 22px 40px 18px 40px;
+            border-bottom: 4px solid #ffc220;
+            box-shadow: 0 2px 16px rgba(102,126,234,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            animation: fadeInDown 1s cubic-bezier(.23,1.01,.32,1) both;
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            gap: 10px;
+        }
+        .header .logo i {
+            color: #ffc220;
+            font-size: 2.1rem;
+        }
+        .header .user-info img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2.5px solid #ffc220;
+            box-shadow: 0 2px 8px rgba(255,194,32,0.12);
+        }
+        .header .user-info .name-role {
+            text-align: right;
+        }
+        .header .logout-btn {
+            background: linear-gradient(135deg, #ffc220, #ffe066);
+            color: #004c91;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.08rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255,194,32,0.10);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .header .logout-btn:hover {
+            background: #004c91;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(255,194,32,0.18);
+        }
+        .dashboard-container {
+            max-width: 1300px;
+            margin: 40px auto 0 auto;
+            padding: 0 18px 32px 18px;
+            position: relative;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 32px;
+            align-items: stretch;
+        }
+        .quick-link {
+            background: linear-gradient(135deg, #f1f5fa 60%, #e0e7ff 100%);
+            color: #004c91;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 1.5px 4px rgba(102,126,234,0.04);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .quick-link:hover {
+            background: #667eea;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(102,126,234,0.18);
+        }
+        .trust-score {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #22c55e;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(34,197,94,0.08);
+            animation: popIn 0.7s cubic-bezier(.23,1.01,.32,1) both;
+        }
+        .trust-label {
+            font-size: 1.08rem;
+            color: #888;
+            font-weight: 600;
+        }
+        .table {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.06);
+            background: rgba(255,255,255,0.98);
+            animation: fadeInUp 1.2s cubic-bezier(.23,1.01,.32,1) both;
+        }
+        .table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 700;
+            font-size: 1.05rem;
+            padding: 14px 10px;
+            border: none;
+        }
+        .table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            transition: background 0.2s;
+        }
+        .table tr:hover {
+            background: rgba(102,126,234,0.07);
+        }
+        textarea, input[type="text"], input[type="email"] {
+            font-family: inherit;
+            font-size: 1.05rem;
+            border-radius: 6px;
+            border: 1.5px solid #c7d2fe;
+            padding: 8px 12px;
+            background: #f4f6fb;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        textarea:focus, input[type="text"]:focus, input[type="email"]:focus {
+            border: 1.5px solid #667eea;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.10);
+            outline: none;
+        }
+        button[type="submit"] {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.08rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.10);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        button[type="submit"]:hover {
+            background: #22c55e;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(34,197,94,0.18);
+        }
+        /* Floating Particles (from global CSS) */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                gap: 14px;
+                padding: 12px 8px 8px 8px;
+            }
+            .dashboard-container {
+                padding: 0 4px 8px 4px;
+            }
+        }
+        .card {
+            min-width: 320px;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-store"></i> Walmart Employee Portal
+        </div>
+        <div class="user-info">
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Photo">
+            <div class="name-role">
+                <div style="font-weight:600;">{{ username }}</div>
+                <div style="font-size:0.98rem; color:#ffc220;">{{ role|default('Employee') }}</div>
+            </div>
+            <a href="/logout"><button class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button></a>
+        </div>
+    </div>
+    <div class="dashboard-container">
+        <div class="dashboard-grid">
+            <!-- Welcome Card -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-icon"><i class="fas fa-hand-wave"></i></div>
+                <h2>Welcome back, {{ username }}!</h2>
+                <div style="color:#666; margin-bottom:8px;">Today is {{ now.strftime('%A, %B %d, %Y') if now else '' }}</div>
+                <div style="color:#004c91; font-size:1.05rem;">Empowering you to do your best work at Walmart.</div>
+            </div>
+            <!-- Trust Score Card -->
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="trust-score">{{ latest.trust_score|int if latest else '--' }}</div>
+                <div class="trust-label">Trust Score</div>
+                <div style="margin-top:10px;">
+                    {% if latest and latest.is_suspicious %}
+                        <span style="color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Suspicious Activity</span>
+                    {% elif latest %}
+                        <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Normal Activity</span>
+                    {% else %}
+                        <span style="color:#888;">No recent activity</span>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Quick Links Card -->
+            <div class="card" style="min-width:320px; grid-column: span 2;">
+                <div class="card-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Quick Links</h3>
+                <div class="quick-links" style="display:flex; flex-wrap:wrap; gap:16px; justify-content:flex-start; padding:10px 0;">
+                    <a class="quick-link" href="#">My Profile</a>
+                    <a class="quick-link" href="#">Payslips</a>
+                    <a class="quick-link" href="#">Internal News</a>
+                    <a class="quick-link" href="#">Support</a>
+                </div>
+            </div>
+            <!-- My Tasks Card (Software Employee Feature) -->
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-tasks"></i></div>
+                <h3>My Tasks</h3>
+                <ul class="stat-list">
+                    <li>Implement new login API <span style="color:#f59e0b;">(In Progress)</span></li>
+                    <li>Fix dashboard bug <span style="color:#ef4444;">(Urgent)</span></li>
+                    <li>Write unit tests <span style="color:#22c55e;">(Completed)</span></li>
+                </ul>
+            </div>
+            <!-- Pull Requests Card (Software Employee Feature) -->
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-code-branch"></i></div>
+                <h3>Pull Requests</h3>
+                <ul class="stat-list">
+                    <li>RBAC+ Refactor <span style="color:#22c55e;">(Merged)</span></li>
+                    <li>Trust Model Update <span style="color:#f59e0b;">(Review)</span></li>
+                    <li>UI Polish <span style="color:#6366f1;">(Open)</span></li>
+                </ul>
+            </div>
+            <!-- Learning Resources Card (Software Employee Feature) -->
+            <div class="card" style="background: #fff; color: #5f0a87; min-width:320px;">
+                <div class="card-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #fff;"><i class="fas fa-book-open"></i></div>
+                <h3 style="color:#5f0a87;">Learning Resources</h3>
+                <div style="display:flex; flex-direction:column; gap:16px; margin-top:10px;">
+                    <a href="#" style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#43e97b,#38f9d7);color:#fff;padding:10px 20px;border-radius:30px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(67,233,123,0.10);transition:background 0.2s,box-shadow 0.2s;">
+                        <i class="fas fa-shield-alt"></i> Secure Coding Guidelines
+                    </a>
+                    <a href="#" style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#5f0a87,#a4508b);color:#fff;padding:10px 20px;border-radius:30px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(164,80,139,0.10);transition:background 0.2s,box-shadow 0.2s;">
+                        <i class="fas fa-plug"></i> API Documentation
+                    </a>
+                    <a href="#" style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#43e97b,#5f0a87);color:#fff;padding:10px 20px;border-radius:30px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(67,233,123,0.10);transition:background 0.2s,box-shadow 0.2s;">
+                        <i class="fas fa-globe"></i> Walmart Dev Portal
+                    </a>
+                </div>
+            </div>
+            <!-- Role-Specific Cards -->
+            {% if role == 'Developer' %}
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-code"></i></div>
+                <h3>My Projects</h3>
+                <ul class="stat-list">
+                    <li>RBAC+ Portal (In Progress)</li>
+                    <li>API Integration (Review)</li>
+                    <li>UI Redesign (Completed)</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-tasks"></i></div>
+                <h3>Code Reviews</h3>
+                <ul class="stat-list">
+                    <li>RBAC+ Auth Module <span style="color:#22c55e;">(2 pending)</span></li>
+                    <li>Trust Model <span style="color:#f59e0b;">(1 pending)</span></li>
+                </ul>
+            </div>
+            {% elif role == 'Data Science Specialist' %}
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Model Performance</h3>
+                <ul class="stat-list">
+                    <li>Isolation Forest: 98% accuracy</li>
+                    <li>Last retrain: 2 days ago</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-flask"></i></div>
+                <h3>Recent Experiments</h3>
+                <ul class="stat-list">
+                    <li>Trust Score Tuning (A/B)</li>
+                    <li>Feature Drift Analysis</li>
+                </ul>
+            </div>
+            {% elif role == 'HR' %}
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-users"></i></div>
+                <h3>Employee Requests</h3>
+                <ul class="stat-list">
+                    <li>3 new leave requests</li>
+                    <li>1 transfer request</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-clipboard-check"></i></div>
+                <h3>Leave Approvals</h3>
+                <ul class="stat-list">
+                    <li>2 pending approvals</li>
+                    <li>Next review: Today 3pm</li>
+                </ul>
+            </div>
+            {% endif %}
+            <!-- Company News Card -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-icon"><i class="fas fa-newspaper"></i></div>
+                <h3>Company News & Announcements</h3>
+                <ul class="news-list">
+                    <li>Walmart Tech Summit 2024 - Registration open!</li>
+                    <li>New Employee Benefits Portal launching next week.</li>
+                    <li>Security Awareness Month: Complete your training.</li>
+                </ul>
+            </div>
+            <!-- Personal Activity Log -->
+            <!-- Developer Feature: System Health & Deployments -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-icon"><i class="fas fa-server"></i></div>
+                <h3>System Health & Deployments</h3>
+                <div style="display: flex; flex-direction: column; gap: 18px; margin-top: 10px;">
+                    <div style="display: flex; align-items: center; gap: 18px;">
+                        <span style="font-size: 1.2rem; color: #22c55e;"><i class="fas fa-circle"></i></span>
+                        <span style="font-weight: 600; color: #222;">API Server</span>
+                        <span style="color: #22c55e; font-weight: 600;">Healthy</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 18px;">
+                        <span style="font-size: 1.2rem; color: #f59e0b;"><i class="fas fa-circle"></i></span>
+                        <span style="font-weight: 600; color: #222;">ML Model Service</span>
+                        <span style="color: #f59e0b; font-weight: 600;">Degraded</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 18px;">
+                        <span style="font-size: 1.2rem; color: #ef4444;"><i class="fas fa-circle"></i></span>
+                        <span style="font-weight: 600; color: #222;">Database</span>
+                        <span style="color: #ef4444; font-weight: 600;">Down</span>
+                    </div>
+                    <div style="margin-top: 18px;">
+                        <div style="font-weight: 700; color: #6366f1; margin-bottom: 8px;"><i class="fas fa-rocket"></i> Recent Deployments</div>
+                        <ul style="list-style: none; padding: 0; color: #444; font-size: 1rem;">
+                            <li>v2.1.0 - Trust Model Update <span style="color:#22c55e;">(Success)</span></li>
+                            <li>v2.0.5 - UI Polish <span style="color:#22c55e;">(Success)</span></li>
+                            <li>v2.0.4 - Security Patch <span style="color:#ef4444;">(Failed)</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Notifications/Alerts -->
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-bell"></i></div>
+                <h3>Notifications & Alerts</h3>
+                <ul class="news-list">
+                    <li><span style="color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Suspicious login detected on 2024-05-01</span></li>
+                    <li><span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Your profile was updated successfully.</span></li>
+                    <li><span style="color:#6366f1;"><i class="fas fa-info-circle"></i> HR: Submit your leave requests by Friday.</span></li>
+                </ul>
+            </div>
+            <!-- Gamification/Badges -->
+            <div class="card">
+                <div class="card-icon"><i class="fas fa-trophy"></i></div>
+                <h3>Achievements</h3>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                    <span title="Login Streak"><i class="fas fa-fire" style="color:#f59e0b;font-size:1.5rem;"></i> 7-day Streak</span>
+                    <span title="High Trust"><i class="fas fa-shield-alt" style="color:#22c55e;font-size:1.5rem;"></i> 90+ Trust</span>
+                    <span title="Security Training"><i class="fas fa-graduation-cap" style="color:#6366f1;font-size:1.5rem;"></i> Training Complete</span>
+                </div>
+            </div>
+            <!-- Feedback Form -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-icon"><i class="fas fa-comment-dots"></i></div>
+                <h3>Feedback & Suggestions</h3>
+                {% if feedback_msg %}
+                    <div style="margin-bottom:12px; color:#22c55e; font-weight:600;">{{ feedback_msg }}</div>
+                {% endif %}
+                <form method="POST" action="/submit_feedback">
+                    <textarea name="feedback" rows="3" style="width:100%;border-radius:6px;border:1px solid #ccc;padding:8px;resize:vertical;" placeholder="Your feedback or suggestions..."></textarea>
+                    <button type="submit" style="margin-top:10px;background:#004c91;color:#fff;padding:8px 18px;border:none;border-radius:6px;font-weight:600;cursor:pointer;">Submit Feedback</button>
+                </form>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:32px; color:#888; font-size:0.98rem;">
+            <i class="fas fa-info-circle"></i> This is a demo portal for hackathon purposes
+        </div>
+    </div>
+</body>
+</html> 
