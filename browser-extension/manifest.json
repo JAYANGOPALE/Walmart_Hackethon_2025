@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Walmart Trust Score Security",
+  "version": "1.0.0",
+  "description": "Enhanced security system for Walmart employee portal with trust score validation",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "geolocation",
+    "webRequest",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "https://*.walmart.com/*",
+    "https://ipapi.co/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:5000/*",
+        "https://*.walmart.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Walmart Trust Security"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["trust-banner.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+} 

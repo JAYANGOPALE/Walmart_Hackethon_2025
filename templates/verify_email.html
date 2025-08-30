@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Verification - Walmart RBAC+</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card" style="max-width: 450px;">
+            <div class="walmart-header">
+                <h1><i class="fas fa-envelope-open-text"></i> Email Verification</h1>
+                <p>Secure your account with email verification</p>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(59, 130, 246, 0.1); border-radius: 15px; border-left: 4px solid #3b82f6;">
+                <h3 style="color: #1f2937; margin-bottom: 10px;">
+                    <i class="fas fa-shield-check"></i> Security Check Required
+                </h3>
+                <p style="color: #6b7280; margin: 0; font-size: 0.95rem;">
+                    A verification code has been sent to your email address. 
+                    Please enter the 6-digit code below to complete your login.
+                </p>
+            </div>
+            
+            {% if error %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="/verify_email">
+                <div class="form-group">
+                    <label for="email_code">
+                        <i class="fas fa-key"></i> Verification Code
+                    </label>
+                    <input type="text" id="email_code" name="email_code" class="form-control" required autofocus maxlength="6" pattern="[0-9]{6}" placeholder="Enter 6-digit code">
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-check-circle"></i> Verify Code
+                </button>
+            </form>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <a href="/login" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Login
+                </a>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <p style="color: #9ca3af; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> Check your email for the verification code
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add focus animations to form inputs
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+
+            // Add click ripple effect to buttons
+            const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Auto-format verification code input
+            const codeInput = document.getElementById('email_code');
+            codeInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+            });
+        });
+    </script>
+
+    <style>
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .btn-primary, .btn-secondary {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</body>
+</html> 

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Walmart RBAC+</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Sticky Minimalistic Header Bar -->
+    <div class="modern-header-bar">
+        <div class="modern-header-logo">
+            <i class="fas fa-shield-alt"></i> Walmart RBAC+ Security
+        </div>
+        <div class="modern-header-actions">
+            <span class="modern-status"><i class="fas fa-circle"></i> Online</span>
+            <a href="/logout" class="modern-logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </div>
+
+    <div class="dashboard-container modern-dashboard">
+        <!-- Statistics Grid -->
+        <div class="modern-stats-grid">
+            <div class="modern-stat-card">
+                <div class="modern-stat-icon"><i class="fas fa-users"></i></div>
+                <div class="modern-stat-content">
+                    <div class="modern-stat-number" id="total-logins">0</div>
+                    <div class="modern-stat-label">Total Logins</div>
+                </div>
+            </div>
+            <div class="modern-stat-card">
+                <div class="modern-stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="modern-stat-content">
+                    <div class="modern-stat-number" id="suspicious-count">0</div>
+                    <div class="modern-stat-label">Suspicious Logins</div>
+                </div>
+            </div>
+            <div class="modern-stat-card">
+                <div class="modern-stat-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="modern-stat-content">
+                    <div class="modern-stat-number" id="avg-trust-score">0</div>
+                    <div class="modern-stat-label">Avg Trust Score</div>
+                </div>
+            </div>
+            <div class="modern-stat-card">
+                <div class="modern-stat-icon"><i class="fas fa-user-shield"></i></div>
+                <div class="modern-stat-content">
+                    <div class="modern-stat-number" id="unique-users">0</div>
+                    <div class="modern-stat-label">Unique Users</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row: Masonry (T-shape) Layout, New Chart Types -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 36px; margin-bottom: 36px; justify-items: center; align-items: start;">
+            <!-- Trust Score Distribution: Line Chart -->
+            <div class="chart-container" style="width: 520px; min-width: 320px; max-width: 600px; height: 320px; background: linear-gradient(135deg, #2563eb 60%, #60a5fa 100%); border-radius: 36px 12px 36px 12px; box-shadow: 0 10px 40px rgba(37,99,235,0.18), 0 2px 8px rgba(0,0,0,0.08); padding: 40px 32px 24px 32px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; border-left: 10px solid #2563eb; grid-column: 1; grid-row: 1;">
+                <h3 style="font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:18px;text-align:left;"><i class="fas fa-chart-line"></i> Trust Score Distribution</h3>
+                <canvas id="trustLineChart" width="420" height="180"></canvas>
+            </div>
+            <!-- Security Analysis: Bubble Chart -->
+            <div class="chart-container" style="width: 520px; min-width: 320px; max-width: 600px; height: 320px; background: linear-gradient(135deg, #a855f7 60%, #6366f1 100%); border-radius: 12px 36px 12px 36px; box-shadow: 0 10px 40px rgba(168,85,247,0.18), 0 2px 8px rgba(0,0,0,0.08); padding: 40px 32px 24px 32px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; border-top: 10px solid #a855f7; grid-column: 2; grid-row: 1;">
+                <h3 style="font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:18px;text-align:left;"><i class="fas fa-bug"></i> Security Analysis</h3>
+                <canvas id="securityBubbleChart" width="420" height="180"></canvas>
+            </div>
+            <!-- Trust Score Trend: Vertical Bar Chart -->
+            <div class="chart-container" style="width: 840px; min-width: 320px; max-width: 1000px; height: 340px; background: rgba(255,255,255,0.96); border-radius: 32px; box-shadow: 0 12px 40px rgba(102,126,234,0.20), 0 4px 16px rgba(0,0,0,0.10); padding: 40px 32px 24px 32px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; backdrop-filter: blur(12px); border: 2px solid rgba(102,126,234,0.13); grid-column: 1 / span 2; grid-row: 2; margin: 0 auto;">
+                <h3 style="font-size:1.25rem;font-weight:700;color:#22c55e;margin-bottom:18px;text-align:center;"><i class="fas fa-chart-bar"></i> Trust Score Trend</h3>
+                <canvas id="trustBarChart" width="720" height="240"></canvas>
+            </div>
+        </div>
+
+        <!-- Activity Table -->
+        <div class="modern-table-card">
+            <div class="modern-table-header">
+                <div class="modern-table-title"><i class="fas fa-list-alt"></i> Recent Login Activity</div>
+                <div class="modern-table-controls">
+                    <div class="modern-search-box">
+                        <input type="text" placeholder="Search users..." id="searchInput">
+                        <span class="modern-search-icon"><i class="fas fa-search"></i></span>
+                    </div>
+                    <button class="modern-refresh-btn" id="refreshBtn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="table modern-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-user"></i> Username</th>
+                            <th><i class="fas fa-clock"></i> Timestamp (IST)</th>
+                            <th><i class="fas fa-network-wired"></i> IP Address</th>
+                            <th><i class="fas fa-map-marker-alt"></i> Location</th>
+                            <th><i class="fas fa-shield-alt"></i> Trust Score</th>
+                            <th><i class="fas fa-info-circle"></i> Status</th>
+                            <th><i class="fas fa-cogs"></i> Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .modern-header-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 2px 16px rgba(102,126,234,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 40px 12px 40px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        .modern-header-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #667eea;
+            font-size: 1.3rem;
+        }
+        .modern-header-logo i {
+            font-size: 1.5em;
+        }
+        .modern-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+        .modern-status {
+            background: rgba(34,197,94,0.12);
+            color: #22c55e;
+            padding: 6px 16px;
+            border-radius: 18px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .modern-status i {
+            font-size: 0.7em;
+        }
+        .modern-logout-btn {
+            background: rgba(239,68,68,0.12);
+            color: #dc2626;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(239,68,68,0.08);
+        }
+        .modern-logout-btn:hover {
+            background: #dc2626;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(239,68,68,0.18);
+        }
+        .modern-dashboard {
+            max-width: 1400px;
+            margin: 32px auto 0 auto;
+            padding: 0 18px 32px 18px;
+        }
+        .modern-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 28px;
+            margin-bottom: 28px;
+        }
+        .modern-stat-card {
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(102,126,234,0.10), 0 1.5px 4px rgba(0,0,0,0.04);
+            padding: 28px 18px 22px 18px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            min-height: 90px;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .modern-stat-card:hover {
+            box-shadow: 0 8px 32px rgba(102,126,234,0.18), 0 2px 8px rgba(0,0,0,0.08);
+            transform: translateY(-3px) scale(1.03);
+        }
+        .modern-stat-icon {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-radius: 14px;
+            padding: 13px 13px;
+            font-size: 1.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            min-height: 48px;
+        }
+        .modern-stat-content {
+            flex: 1;
+        }
+        .modern-stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+        .modern-stat-label {
+            color: #6b7280;
+            font-size: 0.98rem;
+            font-weight: 500;
+        }
+        .modern-table-card {
+            margin-top: 28px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(102,126,234,0.10), 0 1.5px 4px rgba(0,0,0,0.04);
+            padding: 18px 12px 12px 12px;
+        }
+        .modern-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+        .modern-table-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modern-table-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .modern-search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(102,126,234,0.07);
+            border-radius: 22px;
+            padding: 2px 12px 2px 32px;
+            box-shadow: 0 1.5px 4px rgba(102,126,234,0.04);
+        }
+        .modern-search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 1rem;
+            padding: 8px 0;
+            width: 140px;
+            color: #374151;
+        }
+        .modern-search-icon {
+            position: absolute;
+            left: 10px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        .modern-refresh-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.10);
+            transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .modern-refresh-btn:active {
+            animation: refresh-spin 0.5s linear;
+        }
+        @keyframes refresh-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .modern-table {
+            background: rgba(255,255,255,0.98);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.06);
+        }
+        .modern-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 14px 10px;
+            border: none;
+        }
+        .modern-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            transition: background 0.2s;
+        }
+        .modern-table tbody tr:hover {
+            background: rgba(102,126,234,0.07);
+        }
+        @media (max-width: 1200px) {
+            .modern-stats-grid, .modern-charts-masonry {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 900px) {
+            .modern-stats-grid, .modern-charts-masonry {
+                grid-template-columns: 1fr;
+            }
+            .modern-header-bar {
+                flex-direction: column;
+                gap: 14px;
+                padding: 12px 8px 8px 8px;
+            }
+            .modern-dashboard {
+                padding: 0 4px 8px 4px;
+            }
+            .modern-charts-masonry {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            .modern-chart-card.masonry-bottom {
+                grid-column: 1;
+                max-width: 100%;
+            }
+        }
+        /* Remove all card and chart animations */
+        .modern-stat-card, .modern-chart-card {
+            transition: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remove all stat card animations
+            // No animation code here
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#log-table-body tr');
+                rows.forEach(row => {
+                    const username = row.cells[0].textContent.toLowerCase();
+                    if (username.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            // Refresh button animation (keep only click effect, not spin)
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                location.reload();
+            });
+        });
+        // Fetch and display data
+        fetch('/api/logs')
+            .then(response => response.json())
+            .then(data => {
+                // Update statistics with animation
+                animateNumber('total-logins', data.length);
+                const suspiciousCount = data.filter(log => log.is_suspicious).length;
+                animateNumber('suspicious-count', suspiciousCount);
+                const avgTrust = data.length > 0 ? Math.round(data.reduce((sum, log) => sum + log.trust_score, 0) / data.length) : 0;
+                animateNumber('avg-trust-score', avgTrust);
+                const uniqueUsers = new Set(data.map(log => log.username)).size;
+                animateNumber('unique-users', uniqueUsers);
+
+                // Trust Score Distribution: Line Chart
+                const ctxLine = document.getElementById('trustLineChart').getContext('2d');
+                const gradientLine = ctxLine.createLinearGradient(0, 0, 420, 0);
+                gradientLine.addColorStop(0, '#00c6fb');
+                gradientLine.addColorStop(1, '#005bea');
+                const gradientFill = ctxLine.createLinearGradient(0, 0, 0, 180);
+                gradientFill.addColorStop(0, 'rgba(0,198,251,0.12)');
+                gradientFill.addColorStop(1, 'rgba(0,198,251,0.02)');
+                new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Trust Score',
+                            data: [82, 78, 85, 80, 88, 90, 86],
+                            borderColor: gradientLine,
+                            backgroundColor: gradientFill,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#00c6fb',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 8,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.2)' }, ticks: { color: '#fff' } },
+                            y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.2)' }, ticks: { color: '#fff' } }
+                        }
+                    }
+                });
+
+                // Security Analysis: Bubble Chart
+                const ctxBubble = document.getElementById('securityBubbleChart').getContext('2d');
+                new Chart(ctxBubble, {
+                    type: 'bubble',
+                    data: {
+                        datasets: [
+                            { label: 'Phishing', data: [{x: 1, y: 5, r: 15}], backgroundColor: '#ff6b6b' },
+                            { label: 'Malware', data: [{x: 2, y: 8, r: 20}], backgroundColor: '#ffd93d' },
+                            { label: 'Insider', data: [{x: 3, y: 3, r: 10}], backgroundColor: '#6bcBef' },
+                            { label: 'External', data: [{x: 4, y: 6, r: 12}], backgroundColor: '#38e54d' },
+                            { label: 'Other', data: [{x: 5, y: 2, r: 8}], backgroundColor: '#a66cff' }
+                        ]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: { legend: { display: true, labels: { color: '#fff' } } },
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.2)' }, ticks: { color: '#fff', callback: function(val) { return ['Phishing','Malware','Insider','External','Other'][val-1] || ''; } } },
+                            y: { grid: { color: 'rgba(255,255,255,0.2)' }, ticks: { color: '#fff' } }
+                        }
+                    }
+                });
+
+                // Trust Score Trend: Vertical Bar Chart
+                const ctxBar = document.getElementById('trustBarChart').getContext('2d');
+                const gradientBar = ctxBar.createLinearGradient(0, 0, 0, 240);
+                gradientBar.addColorStop(0, '#667eea');
+                gradientBar.addColorStop(1, '#38bdf8');
+                new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: ['10:00','11:00','12:00','13:00','14:00','15:00','16:00'],
+                        datasets: [{
+                            label: 'Trust Score',
+                            data: [78, 82, 85, 80, 88, 90, 86],
+                            backgroundColor: gradientBar,
+                            borderColor: '#667eea',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: 'rgba(0,0,0,0.08)' }, ticks: { color: '#222' } },
+                            y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.08)' }, ticks: { color: '#222' } }
+                        }
+                    }
+                });
+
+                // Trust Score Trend Line Chart
+                const chartLabels = [];
+                const chartScores = [];
+                data.slice(0, 20).reverse().forEach((log, idx) => {
+                    const row = document.createElement('tr');
+                    const trustScore = parseInt(log.trust_score);
+                    const trustClass = trustScore >= 80 ? 'trust-high' : trustScore >= 50 ? 'trust-medium' : 'trust-low';
+                    const badgeClass = log.is_suspicious ? 'suspicious' : 'trust-high';
+                    const badgeText = log.is_suspicious ? 'Suspicious' : 'Normal';
+                    
+                    row.innerHTML = `
+                        <td><strong>${log.username}</strong></td>
+                        <td>${log.timestamp}</td>
+                        <td><code>${log.ip_address}</code></td>
+                        <td><i class="fas fa-map-marker-alt"></i> ${log.location}</td>
+                        <td><span class="trust-score ${trustClass}">${trustScore}</span></td>
+                        <td><span class="trust-score ${badgeClass}">${badgeText}</span></td>
+                        <td>
+                            <form method="POST" action="/delete_activity/${log.id}" style="display: inline;">
+                                <button type="submit" class="btn-secondary" onclick="return confirm('Are you sure you want to delete this activity?')" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; border-color: #dc2626;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    `;
+                    document.getElementById('log-table-body').appendChild(row);
+                    chartLabels.push(log.timestamp.split(' ')[1]);
+                    chartScores.push(trustScore);
+                });
+
+                new Chart(document.getElementById('trustChart'), {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Trust Score',
+                            data: chartScores,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointBackgroundColor: chartScores.map(s => s >= 80 ? '#22c55e' : s >= 50 ? '#f59e0b' : '#ef4444'),
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 100,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                },
+                                title: { 
+                                    display: true, 
+                                    text: 'Trust Score',
+                                    color: '#6b7280'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                title: { 
+                                    display: true, 
+                                    text: 'Time (IST)',
+                                    color: '#6b7280'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { 
+                                display: false 
+                            }
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+            });
+
+        // Animate number counting
+        function animateNumber(elementId, finalValue) {
+            const element = document.getElementById(elementId);
+            const startValue = 0;
+            const duration = 2000;
+            const increment = finalValue / (duration / 16);
+            let currentValue = startValue;
+            
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= finalValue) {
+                    currentValue = finalValue;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(currentValue);
+            }, 16);
+        }
+    </script>
+</body>
+</html> 

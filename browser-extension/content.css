@@ -1,0 +1,236 @@
+/* Walmart Trust Score Security - Content Styles */
+
+/* Trust Banner Styles */
+#walmart-trust-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 12px 20px;
+    z-index: 10000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    border-bottom: 3px solid #ffc107;
+    transition: all 0.3s ease;
+}
+
+.trust-banner-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.trust-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-icon {
+    font-size: 18px;
+}
+
+.status-text {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.trust-details {
+    display: flex;
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    gap: 5px;
+    font-size: 12px;
+}
+
+.label {
+    opacity: 0.8;
+}
+
+.value {
+    font-weight: 500;
+}
+
+/* Trust Score Colors */
+.trust-score-high {
+    color: #4caf50 !important;
+}
+
+.trust-score-medium {
+    color: #ff9800 !important;
+}
+
+.trust-score-low {
+    color: #f44336 !important;
+}
+
+/* Banner State Variations */
+.trust-banner-warning {
+    background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+    border-bottom-color: #ff5722;
+}
+
+.trust-banner-success {
+    background: linear-gradient(135deg, #388e3c 0%, #4caf50 100%);
+    border-bottom-color: #8bc34a;
+}
+
+.trust-banner-error {
+    background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+    border-bottom-color: #ff5722;
+    animation: pulse 2s infinite;
+}
+
+/* Security Alert Styles */
+#walmart-security-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    backdrop-filter: blur(5px);
+}
+
+.alert-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+}
+
+.alert-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.alert-message {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.alert-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.alert-button:hover {
+    background: #0056b3;
+}
+
+/* Loading Spinner */
+.trust-loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        transform: translateY(-20px); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translateY(0); 
+        opacity: 1; 
+    }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .trust-banner-content {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .trust-details {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .alert-content {
+        margin: 20px;
+        max-width: calc(100% - 40px);
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .alert-content {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .alert-message {
+        color: #e2e8f0;
+    }
+    
+    .alert-button {
+        background: #4299e1;
+    }
+    
+    .alert-button:hover {
+        background: #3182ce;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    #walmart-trust-banner {
+        border-bottom-width: 4px;
+    }
+    
+    .alert-content {
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    #walmart-trust-banner,
+    .alert-content {
+        animation: none;
+    }
+    
+    .trust-loading {
+        animation: none;
+    }
+} 
